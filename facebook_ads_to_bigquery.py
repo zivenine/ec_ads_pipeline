@@ -34,18 +34,28 @@ fields = [
 ]
 params = {
     'time_increment': 1,
-    'time_range': {'since': (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d'),
+    'time_range': {'since': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
                    'until': datetime.now().strftime('%Y-%m-%d')},
 }
 
 data = ad_account.get_insights(fields=fields, params=params)
+
+print(data)
 
 # Step 2: Convert JSON object to DataFrame
 
 df_data = []
 for entry in data:
     df_data.append({
+        'date_start': entry['date_start'],
+        'date_stop': entry['date_stop'],
+        'account_id': entry['account_id'],
         'campaign_name': entry['campaign_name'],
+        'adset_name': entry['adset_name'],
+        'impressions': entry['impressions'],
+        'clicks': ['clicks'],
+        'ctr': entry['ctr'],
+        'cpc': entry['cpc'],
         'conversions': entry['conversions'][0]['7d_click'] if 'conversions' in entry else 0,
         'spend': entry['spend'],
     })
@@ -56,13 +66,21 @@ df = pd.DataFrame(df_data)
 
 # Use a service account JSON file for authentication
 client = bigquery.Client.from_service_account_json(
-    'path/to/your/service-account-file.json'
+    'ecocare-ads-data-26533bc415de.json'
 )
-table_id = "your-project.your-dataset.your-table"
+table_id = "ecocare-ads-data.ecocare_ads_data.ecocare_facebook_ads_campaign"
 
 job_config = bigquery.LoadJobConfig(
     schema=[
+        bigquery.SchemaField("date_start", bigquery.enums.SqlTypeNames.STRING),
+        bigquery.SchemaField("date_stop", bigquery.enums.SqlTypeNames.STRING),
+        bigquery.SchemaField("account_id", bigquery.enums.SqlTypeNames.INT64),
         bigquery.SchemaField("campaign_name", bigquery.enums.SqlTypeNames.STRING),
+        bigquery.SchemaField("adset_name", bigquery.enums.SqlTypeNames.STRING),
+        bigquery.SchemaField("impressions", bigquery.enums.SqlTypeNames.INT64),
+        bigquery.SchemaField("clicks", bigquery.enums.SqlTypeNames.INT64),
+        bigquery.SchemaField("ctr", bigquery.enums.SqlTypeNames.FLOAT64),
+        bigquery.SchemaField("cpc", bigquery.enums.SqlTypeNames.FLOAT64),
         bigquery.SchemaField("conversions", bigquery.enums.SqlTypeNames.INT64),
         bigquery.SchemaField("spend", bigquery.enums.SqlTypeNames.FLOAT64),
     ],
