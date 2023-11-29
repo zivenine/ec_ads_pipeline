@@ -41,7 +41,7 @@ params = {
 
 data = ad_account.get_insights(fields=fields, params=params)
 
-print(data)
+# print(data)
 
 # Step 2: Convert JSON object to DataFrame
 
