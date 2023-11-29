@@ -5,3 +5,5 @@ credentials.py
 
 venv/
 .idea
+
+__pycache__

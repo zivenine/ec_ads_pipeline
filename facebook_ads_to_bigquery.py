@@ -23,7 +23,7 @@ fields = [
     AdsInsights.Field.date_stop,
     AdsInsights.Field.account_id,
     AdsInsights.Field.campaign_name,
-    AdsInsights.Field.adset_name, 
+    AdsInsights.Field.adset_name,
     AdsInsights.Field.ad_name,
     AdsInsights.Field.impressions,
     AdsInsights.Field.clicks,
@@ -33,6 +33,7 @@ fields = [
     AdsInsights.Field.spend,
 ]
 params = {
+    'level': 'ad',
     'time_increment': 1,
     'time_range': {'since': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
                    'until': datetime.now().strftime('%Y-%m-%d')},
@@ -53,14 +54,23 @@ for entry in data:
         'campaign_name': entry['campaign_name'],
         'adset_name': entry['adset_name'],
         'impressions': entry['impressions'],
-        'clicks': ['clicks'],
+        'clicks': entry['clicks'],
         'ctr': entry['ctr'],
-        'cpc': entry['cpc'],
+        'cpc': entry['cpc'] if 'cpc' in entry else 0,
         'conversions': entry['conversions'][0]['7d_click'] if 'conversions' in entry else 0,
         'spend': entry['spend'],
     })
 
 df = pd.DataFrame(df_data)
+
+# Step 2.5: Explicitly specify the datatypes for int features
+
+df['impressions'] = df['impressions'].astype(int)
+df['clicks'] = df['clicks'].astype(int)
+df['conversions'] = df['conversions'].astype(int)
+df['ctr'] = df['ctr'].astype(float)
+df['cpc'] = df['cpc'].astype(float)
+df['spend'] = df['spend'].astype(float)
 
 # Step 3: Send DataFrame to BigQuery
 
@@ -74,7 +84,7 @@ job_config = bigquery.LoadJobConfig(
     schema=[
         bigquery.SchemaField("date_start", bigquery.enums.SqlTypeNames.STRING),
         bigquery.SchemaField("date_stop", bigquery.enums.SqlTypeNames.STRING),
-        bigquery.SchemaField("account_id", bigquery.enums.SqlTypeNames.INT64),
+        bigquery.SchemaField("account_id", bigquery.enums.SqlTypeNames.STRING),
         bigquery.SchemaField("campaign_name", bigquery.enums.SqlTypeNames.STRING),
         bigquery.SchemaField("adset_name", bigquery.enums.SqlTypeNames.STRING),
         bigquery.SchemaField("impressions", bigquery.enums.SqlTypeNames.INT64),
