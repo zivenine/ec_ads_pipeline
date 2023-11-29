@@ -4,8 +4,8 @@ from google.analytics.data_v1beta.types import RunReportRequest
 from google.cloud import bigquery
 
 # Path to your service account keys
-ga_service_account_path = 'path/to/ga/service_account.json'
-bq_service_account_path = 'path/to/bq/service_account.json'
+ga_service_account_path = 'ecocare-ads-data-e8c8eaeeb5de.json'
+bq_service_account_path = 'ecocare-ads-data-e8c8eaeeb5de.json'
 
 # Authenticate with Google Analytics Data API
 ga_credentials = service_account.Credentials.from_service_account_file(ga_service_account_path)
@@ -30,10 +30,12 @@ response = ga_client.run_report(report_request)
 data_for_bq = []
 for row in response.rows:
     data_for_bq.append({"city": row.dimension_values[0].value, "active_users": int(row.metric_values[0].value)})
+    
+print(data_for_bq)
 
 # Define BigQuery dataset and table
-dataset_id = 'your_dataset_id'
-table_id = 'your_table_id'
+dataset_id = 'ecocare-ads-data.ecocare_ads_data'
+table_id = 'ecocare-ads-data.ecocare_ads_data.ecocare_ga4_all_sources'
 
 # Create a BigQuery dataset if not exists
 dataset = bigquery.Dataset(f"{bq_client.project}.{dataset_id}")
