@@ -63,24 +63,34 @@ for row in response.rows:
                         "conversions": float(row.metric_values[6].value),
                         "userConversionRate": float(row.metric_values[7].value),
                         "totalRevenue": float(row.metric_values[8].value)})  
-print(data_for_bq)
+# print(data_for_bq)
 
 # Define BigQuery dataset and table
 dataset_id = 'ecocare-ads-data.ecocare_ads_data'
 table_id = 'ecocare-ads-data.ecocare_ads_data.ecocare_ga4_all_sources'
 
 # Create a BigQuery dataset if not exists
-dataset = bigquery.Dataset(f"{dataset_id}")
-dataset.location = "US"
-bq_client.create_dataset(dataset, exists_ok=True)
+# dataset = bigquery.Dataset(f"{dataset_id}")
+# dataset.location = "US"
+# bq_client.create_dataset(dataset, exists_ok=True)
 
 # Create a BigQuery table if not exists
 schema = [
-    bigquery.SchemaField("city", "STRING"),
+    bigquery.SchemaField("date", "STRING"),
+    bigquery.SchemaField("sessionSource", "STRING"),
+    bigquery.SchemaField("sessionMedium", "STRING"),
+    bigquery.SchemaField("totalUsers", "INTEGER"),
     bigquery.SchemaField("active_users", "INTEGER"),
+    bigquery.SchemaField("newUsers", "INTEGER"),
+    bigquery.SchemaField("addToCarts", "INTEGER"),
+    bigquery.SchemaField("checkouts", "INTEGER"),
+    bigquery.SchemaField("transactions", "FLOAT"),
+    bigquery.SchemaField("conversions", "FLOAT"),
+    bigquery.SchemaField("userConversionRate", "FLOAT"),
+    bigquery.SchemaField("totalRevenue", "FLOAT")
 ]
 table = bigquery.Table(f"{table_id}", schema=schema)
-table = bq_client.create_table(table, exists_ok=True)
+# table = bq_client.create_table(table, exists_ok=True)
 
 # Insert data into BigQuery
 errors = bq_client.insert_rows_json(table, data_for_bq)
