@@ -16,22 +16,27 @@ def google_ads_to_bigquery():
         google_ads_client = GoogleAdsClient.load_from_storage('google_ads_config.yaml')
 
         # Initialize BigQuery Client
-        credentials = service_account.Credentials.from_service_account_file('ecocare-ads-data-26533bc415de.json')
-        bigquery_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+        creds = service_account.Credentials.from_service_account_file('ecocare-ads-data-26533bc415de.json')
+        bigquery_client = bigquery.Client(credentials=creds, project=credentials.bq_project_id)
 
         # Define GAQL Query
         query = """
             SELECT campaign.id, campaign.name, metrics.impressions, metrics.clicks, metrics.ctr, metrics.average_cpc,
                 metrics.conversions, metrics.cost_per_conversion, metrics.cost_micros
             FROM campaign
-            WHERE segments.date DURING LAST_90_DAYS
+            WHERE segments.date DURING LAST_30_DAYS
         """
 
         # Fetch Data from Google Ads
-        search_request = google_ads_client.service.google_ads.search(
-            customer_id=credentials.google_ads_customer_id,
-            query=query
-        )
+        # search_request = google_ads_client.service.google_ads.search(
+        #    customer_id=credentials.google_ads_customer_id,
+        #    query=query
+        #)
+        
+        # Fetch Data from Google Ads using Search
+        google_ads_service = google_ads_client.get_service('GoogleAdsService', version='v15')  # Replace 'vX' with the appropriate API version
+        search_request = google_ads_service.search(customer_id=credentials.google_ads_customer_id, query=query)
+
 
         # Prepare Data for BigQuery
         rows_to_insert = []
@@ -50,8 +55,8 @@ def google_ads_to_bigquery():
             rows_to_insert.append(campaign_data)
 
         # Send Data to BigQuery
-        dataset_id = 'google_ads_dataset_id'
-        table_id = 'google_ads_table_id'
+        dataset_id = credentials.google_ads_dataset_id
+        table_id = credentials.google_ads_table_id
         table_ref = bigquery_client.dataset(dataset_id).table(table_id)
         errors = bigquery_client.insert_rows_json(table_ref, rows_to_insert)
 
@@ -76,3 +81,5 @@ def google_ads_to_bigquery():
     except Exception as e:
         # Handle other exceptions
         logging.error(f'An unexpected error occurred: {e}')
+
+google_ads_to_bigquery()
