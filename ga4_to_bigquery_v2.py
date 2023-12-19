@@ -7,6 +7,8 @@ from google.analytics.data_v1beta.types import (
     Metric,
     MetricType,)
 from google.cloud import bigquery
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import credentials
 
 # Path to your service account keys
@@ -22,6 +24,12 @@ ga_client = BetaAnalyticsDataClient(credentials=ga_credentials)
 # Authenticate with BigQuery
 bq_credentials = service_account.Credentials.from_service_account_file(bq_service_account_path)
 bq_client = bigquery.Client(credentials=bq_credentials, project=bq_credentials.project_id)
+
+# Create the previous month date range
+today = datetime.today()
+first_day_current_month = today.replace(day=1)
+first_day_previous_month = str((first_day_current_month - relativedelta(months=1)).date())
+last_day_previous_month = str((first_day_current_month - relativedelta(days=1)).date())
 
 # Define GA4 report request
 report_request = RunReportRequest(
@@ -40,7 +48,7 @@ report_request = RunReportRequest(
             Metric(name="userConversionRate"),
             Metric(name="totalRevenue"),
         ],
-        date_ranges=[DateRange(start_date="30daysAgo", end_date="today")],
+        date_ranges=[DateRange(start_date=first_day_previous_month, end_date=last_day_previous_month)],
     )
 
 # Run GA4 report
