@@ -4,13 +4,12 @@ from google.analytics.data_v1beta.types import (
     RunReportRequest,
     DateRange,
     Dimension,
-    Metric,
-    MetricType,)
+    Metric,)
 from google.cloud import bigquery
 from google.cloud import secretmanager
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import credentials
+
 
 def access_secret():
     # Create the Secret Manager client.
@@ -35,7 +34,6 @@ def get_ga4():
     ga_service_account_path = secret
     bq_service_account_path = secret
     property_id = 287076883
-    project_id = 'ecocare-ads-data'
 
     # Authenticate with Google Analytics Data API
     ga_credentials = service_account.Credentials.from_service_account_file(ga_service_account_path)
@@ -93,7 +91,6 @@ def get_ga4():
                             "totalRevenue": float(row.metric_values[8].value)})  
 
     # Define BigQuery dataset and table
-    dataset_id = 'ecocare-ads-data.ecocare_ads_data'
     table_id = 'ecocare-ads-data.ecocare_ads_data.ecocare_ga4_all_sources'
 
     # Create a BigQuery dataset if not exists
@@ -125,6 +122,7 @@ def get_ga4():
         print("Data loaded into BigQuery successfully.")
     else:
         print("Errors occurred while loading data into BigQuery:", errors)
+
 
 # Call the function
 get_ga4()
