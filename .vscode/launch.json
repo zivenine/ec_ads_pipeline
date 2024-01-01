@@ -1,19 +1,15 @@
 {
     "configurations": [
         {
-            "name": "Docker: Python - General",
-            "type": "docker",
+            "name": "Python: Current File",
+            "type": "python",
             "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "general"
-            }
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\Dinesh\\Dropbox\\Marketing Systems\\Clients\\EcoCare\\ec_ads_data_pipeline\\Working\\ecocare-ads-data-26533bc415de.json"
+              }
         }
     ]
 }

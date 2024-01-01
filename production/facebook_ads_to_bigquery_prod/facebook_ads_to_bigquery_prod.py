@@ -6,6 +6,8 @@ from google.cloud import bigquery
 from google.cloud import secretmanager
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import json
+from google.oauth2 import service_account
 
 # Secret access for get_fb
 def access_fb_app_secret():
@@ -13,7 +15,7 @@ def access_fb_app_secret():
     client = secretmanager.SecretManagerServiceClient()
 
     # Name of the secret and the project
-    name = "projects/639850821884/secrets/ecocare_fb_app_secret"
+    name = "projects/639850821884/secrets/ecocare_fb_app_secret/versions/latest"
 
     # Access the secret version.
     response = client.access_secret_version(request={"name": name})
@@ -28,7 +30,7 @@ def access_fb_access_token():
     client = secretmanager.SecretManagerServiceClient()
 
     # Name of the secret and the project
-    name = "projects/639850821884/secrets/ecocare_fb_access_token"
+    name = "projects/639850821884/secrets/ecocare_fb_access_token/versions/latest"
 
     # Access the secret version.
     response = client.access_secret_version(request={"name": name})
@@ -38,10 +40,27 @@ def access_fb_access_token():
 
     return access_token_string
 
+def access_gbq_service_account():
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Name of the secret and the project
+    name = "projects/639850821884/secrets/ecocare-ads-data-26533bc415de/versions/latest"
+
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Extract the payload as a string.
+    gbq_service_account_string = response.payload.data.decode("UTF-8")
+
+    return gbq_service_account_string
+
 def get_fb():
     # Access the secret 
     app_secret = access_fb_app_secret()
     access_token = access_fb_access_token()
+    service_account_info = access_gbq_service_account()
+    service_account_json = json.loads(service_account_info)
 
     # Replace with your own credentials
     my_app_id = '674029601373497'
@@ -119,10 +138,9 @@ def get_fb():
 
     # Step 3: Send DataFrame to BigQuery
 
-    # Use a service account JSON file for authentication
-    client = bigquery.Client.from_service_account_json(
-        'ecocare-ads-data-26533bc415de.json'
-    )
+    # Use the service account info to create the client
+    serv_acc_creds = service_account.Credentials.from_service_account_info(service_account_json)
+    client = bigquery.Client(credentials=serv_acc_creds)
     table_id = "ecocare-ads-data.ecocare_ads_data.ecocare_facebook_ads_campaign"
 
     job_config = bigquery.LoadJobConfig(

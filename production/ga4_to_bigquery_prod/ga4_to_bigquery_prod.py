@@ -16,7 +16,7 @@ def access_secret():
     client = secretmanager.SecretManagerServiceClient()
 
     # Name of the secret and the project
-    name = "projects/639850821884/secrets/ecocare-ads-data-e8c8eaeeb5de"
+    name = "projects/639850821884/secrets/ecocare-ads-data-e8c8eaeeb5de/versions/latest"
 
     # Access the secret version.
     response = client.access_secret_version(request={"name": name})
