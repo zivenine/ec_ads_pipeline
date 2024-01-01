@@ -3,9 +3,9 @@ from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adsinsights import AdsInsights
 from google.cloud import bigquery
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import credentials
+import Working.credentials as credentials
 
 # Replace with your own credentials
 my_app_id = credentials.facebook_app_id
@@ -23,7 +23,6 @@ first_day_previous_month = (first_day_current_month - relativedelta(months=1)).d
 last_day_previous_month = (first_day_current_month - relativedelta(days=1)).date()
 first_day_previous_month_iso = first_day_previous_month.isoformat()
 last_day_previous_month_iso = last_day_previous_month.isoformat()
-
 
 ad_account_id = credentials.facebook_ad_account_id
 ad_account = AdAccount('act_{}'.format(ad_account_id))
@@ -45,8 +44,8 @@ fields = [
 params = {
     'level': 'ad',
     'time_increment': 1,
-    'time_range': {'since': "2023-07-01",
-                   'until': "2023-10-31"},
+    'time_range': {'since': first_day_previous_month_iso,
+                   'until': last_day_previous_month_iso},
 }
 
 data = ad_account.get_insights(fields=fields, params=params)
@@ -88,7 +87,7 @@ df['spend'] = df['spend'].astype(float)
 client = bigquery.Client.from_service_account_json(
     'ecocare-ads-data-26533bc415de.json'
 )
-table_id = "ecocare-ads-data.ecocare_ads_historical.ecocare_facebook_historical"
+table_id = "ecocare-ads-data.ecocare_ads_data.ecocare_facebook_ads_campaign"
 
 job_config = bigquery.LoadJobConfig(
     schema=[
@@ -105,7 +104,7 @@ job_config = bigquery.LoadJobConfig(
         bigquery.SchemaField("spend", bigquery.enums.SqlTypeNames.FLOAT64),
     ],
     # overwrite existing table data
-    write_disposition="WRITE_APPEND",
+    write_disposition="WRITE_TRUNCATE",
 )
 
 job = client.load_table_from_dataframe(

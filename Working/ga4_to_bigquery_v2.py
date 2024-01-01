@@ -9,7 +9,7 @@ from google.analytics.data_v1beta.types import (
 from google.cloud import bigquery
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import credentials
+import Working.credentials as credentials
 
 # Path to your service account keys
 ga_service_account_path = 'ecocare-ads-data-e8c8eaeeb5de.json'

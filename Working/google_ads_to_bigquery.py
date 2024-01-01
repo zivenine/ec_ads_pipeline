@@ -4,7 +4,7 @@ from google.ads.googleads.errors import GoogleAdsException
 from google.cloud import bigquery
 from google.cloud.exceptions import GoogleCloudError
 from google.oauth2 import service_account
-import credentials
+import Working.credentials as credentials
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
