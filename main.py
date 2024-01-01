@@ -15,6 +15,9 @@ from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adsinsights import AdsInsights
 
+"""
+The snippets which manage the secrets for credentials
+"""
 # Secret access for get_ga4
 def access_secret_1():
     # Create the Secret Manager client.
@@ -32,21 +35,39 @@ def access_secret_1():
     return secret_string_1
 
 # Secret access for get_fb
-def access_secret_2():
+def access_fb_app_secret():
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
 
     # Name of the secret and the project
-    name = "projects/639850821884/secrets/ecocare-ads-data-e8c8eaeeb5de"
+    name = "projects/639850821884/secrets/ecocare_fb_app_secret"
 
     # Access the secret version.
     response = client.access_secret_version(request={"name": name})
 
     # Extract the payload as a string.
-    secret_string_1 = response.payload.data.decode("UTF-8")
+    app_secret_string = response.payload.data.decode("UTF-8")
 
-    return secret_string_2
+    return app_secret_string
 
+def access_fb_access_token():
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Name of the secret and the project
+    name = "projects/639850821884/secrets/ecocare_fb_access_token"
+
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Extract the payload as a string.
+    access_token_string = response.payload.data.decode("UTF-8")
+
+    return access_token_string
+
+""""
+The snippet to send GA4 data to BigQuery. 
+"""
 def get_ga4():
     # Access the secret 
     secret = access_secret_1()
@@ -143,6 +164,12 @@ def get_ga4():
         print("Data loaded into BigQuery successfully.")
     else:
         print("Errors occurred while loading data into BigQuery:", errors)
+
+"""
+The snippet which sends data from Facebook to BigQuery
+"""
+
+
 
 
 # Call the function
