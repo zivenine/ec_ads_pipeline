@@ -159,30 +159,49 @@ def get_ga4():
     # dataset.location = "US"
     # bq_client.create_dataset(dataset, exists_ok=True)
 
-    # Create a BigQuery table if not exists
-    schema = [
-        bigquery.SchemaField("date", "STRING"),
-        bigquery.SchemaField("sessionSource", "STRING"),
-        bigquery.SchemaField("sessionMedium", "STRING"),
-        bigquery.SchemaField("totalUsers", "INTEGER"),
-        bigquery.SchemaField("active_users", "INTEGER"),
-        bigquery.SchemaField("newUsers", "INTEGER"),
-        bigquery.SchemaField("addToCarts", "INTEGER"),
-        bigquery.SchemaField("checkouts", "INTEGER"),
-        bigquery.SchemaField("transactions", "FLOAT"),
-        bigquery.SchemaField("conversions", "FLOAT"),
-        bigquery.SchemaField("userConversionRate", "FLOAT"),
-        bigquery.SchemaField("totalRevenue", "FLOAT")
-    ]
-    table = bigquery.Table(f"{table_id}", schema=schema)
+    # Create the BigQuery job config
+    ga4_job_config = bigquery.LoadJobConfig(
+        schema=[
+            bigquery.SchemaField("date", "STRING"),
+            bigquery.SchemaField("sessionSource", "STRING"),
+            bigquery.SchemaField("sessionMedium", "STRING"),
+            bigquery.SchemaField("totalUsers", "INTEGER"),
+            bigquery.SchemaField("active_users", "INTEGER"),
+            bigquery.SchemaField("newUsers", "INTEGER"),
+            bigquery.SchemaField("addToCarts", "INTEGER"),
+            bigquery.SchemaField("checkouts", "INTEGER"),
+            bigquery.SchemaField("transactions", "FLOAT"),
+            bigquery.SchemaField("conversions", "FLOAT"),
+            bigquery.SchemaField("userConversionRate", "FLOAT"),
+            bigquery.SchemaField("totalRevenue", "FLOAT")
+        ],
+        # overwrite existing table data
+        write_disposition="WRITE_TRUNCATE",
+    )
+    # schema = [
+    #     bigquery.SchemaField("date", "STRING"),
+    #     bigquery.SchemaField("sessionSource", "STRING"),
+    #     bigquery.SchemaField("sessionMedium", "STRING"),
+    #     bigquery.SchemaField("totalUsers", "INTEGER"),
+    #     bigquery.SchemaField("active_users", "INTEGER"),
+    #     bigquery.SchemaField("newUsers", "INTEGER"),
+    #     bigquery.SchemaField("addToCarts", "INTEGER"),
+    #     bigquery.SchemaField("checkouts", "INTEGER"),
+    #     bigquery.SchemaField("transactions", "FLOAT"),
+    #     bigquery.SchemaField("conversions", "FLOAT"),
+    #     bigquery.SchemaField("userConversionRate", "FLOAT"),
+    #     bigquery.SchemaField("totalRevenue", "FLOAT")
+    # ]
+    table = bigquery.Table(f"{table_id}")
     # table = bq_client.create_table(table, exists_ok=True)
 
     # Insert data into BigQuery
-    errors = bq_client.insert_rows_json(table, data_for_bq)
-    if errors == []:
-        print("Data loaded into BigQuery successfully.")
+    ga4_job = bq_client.load_table_from_json(data_for_bq, table, job_config=ga4_job_config)
+    ga4_job.result()
+    if not ga4_job.errors:
+        print("GA4 data loaded into BigQuery successfully.", ga4_job)
     else:
-        print("Errors occurred while loading data into BigQuery:", errors)
+        print("Errors occurred while loading GA4 data into BigQuery:", ga4_job.errors)
 
 """
 The snippet which sends data from Facebook to BigQuery
@@ -293,16 +312,20 @@ def get_fb():
         write_disposition="WRITE_TRUNCATE",
     )
 
-    job = client.load_table_from_dataframe(
+    fb_job = client.load_table_from_dataframe(
         df, table_id, job_config=job_config
     )
-    job.result()
+    fb_job.result()
+    if not fb_job.errors:
+        print("Facebook data loaded into BigQuery successfully.", fb_job)
+    else:
+        print("Errors occurred while loading Facebook data into BigQuery:", fb_job.errors)
 
 
 # Call the function
 def get_the_data():
     get_ga4()
-    time.sleep(300)
+    time.sleep(200)
     get_fb()
 
 
