@@ -40,7 +40,7 @@ def access_fb_access_token():
 
     return access_token_string
 
-def access_gbq_service_account():
+def access_ads_service_account():
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
 
@@ -59,7 +59,7 @@ def get_fb():
     # Access the secret 
     app_secret = access_fb_app_secret()
     access_token = access_fb_access_token()
-    service_account_info = access_gbq_service_account()
+    service_account_info = access_ads_service_account()
     service_account_json = json.loads(service_account_info)
 
     # Replace with your own credentials

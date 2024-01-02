@@ -14,12 +14,14 @@ import pandas as pd
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adsinsights import AdsInsights
+import time
+import json
 
 """
 The snippets which manage the secrets for credentials
 """
 # Secret access for get_ga4
-def access_secret_1():
+def access_ga4_service_account():
     # Create the Secret Manager client.
     client = secretmanager.SecretManagerServiceClient()
 
@@ -65,24 +67,41 @@ def access_fb_access_token():
 
     return access_token_string
 
+def access_ads_service_account():
+    # Create the Secret Manager client.
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Name of the secret and the project
+    name = "projects/639850821884/secrets/ecocare-ads-data-26533bc415de/versions/latest"
+
+    # Access the secret version.
+    response = client.access_secret_version(request={"name": name})
+
+    # Extract the payload as a string.
+    gbq_service_account_string = response.payload.data.decode("UTF-8")
+
+    return gbq_service_account_string
+
 """"
 The snippet to send GA4 data to BigQuery. 
 """
 def get_ga4():
     # Access the secret 
-    secret = access_secret_1()
+    secret = access_ga4_service_account()
     
     # Path to your service account keys
     ga_service_account_path = secret
+    ga_service_account_json = json.loads(ga_service_account_path)
     bq_service_account_path = secret
-    property_id = 287076883
+    bq_service_account_json = json.loads(bq_service_account_path)
+    property_id = '287076883'
 
     # Authenticate with Google Analytics Data API
-    ga_credentials = service_account.Credentials.from_service_account_file(ga_service_account_path)
+    ga_credentials = service_account.Credentials.from_service_account_info(ga_service_account_json)
     ga_client = BetaAnalyticsDataClient(credentials=ga_credentials)
 
     # Authenticate with BigQuery
-    bq_credentials = service_account.Credentials.from_service_account_file(bq_service_account_path)
+    bq_credentials = service_account.Credentials.from_service_account_info(bq_service_account_json)
     bq_client = bigquery.Client(credentials=bq_credentials, project=bq_credentials.project_id)
 
     # Create the previous month date range
@@ -114,7 +133,7 @@ def get_ga4():
     # Run GA4 report
     response = ga_client.run_report(report_request)
 
-    print(response)
+    # print(response)
 
     # Extract data
     data_for_bq = []
@@ -172,7 +191,7 @@ def get_fb():
     # Access the secret 
     app_secret = access_fb_app_secret()
     access_token = access_fb_access_token()
-    service_account_info = access_gbq_service_account()
+    service_account_info = access_ads_service_account()
     service_account_json = json.loads(service_account_info)
 
     # Replace with your own credentials
@@ -280,10 +299,11 @@ def get_fb():
     job.result()
 
 
-
 # Call the function
 def get_the_data():
     get_ga4()
+    time.sleep(300)
     get_fb()
-    
+
+
 get_the_data()
