@@ -324,6 +324,7 @@ def get_fb():
 
 # Call the function
 def get_the_data():
+    app.run(host='0.0.0.0', port=8080)
     get_ga4()
     time.sleep(200)
     get_fb()
