@@ -65,4 +65,5 @@ The data is pulled from BigQuery into Looker Studio so that it can be reviewed a
 
 ![image](https://github.com/zivenine/ec_ads_pipeline/assets/138107601/60b484aa-9209-433c-b8c2-31c4ea436312)
 
+![image](https://github.com/zivenine/ec_ads_pipeline/assets/138107601/049a56e8-0cc7-48f7-aecc-a59dee48aa71)
 
