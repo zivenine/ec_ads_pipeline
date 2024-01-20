@@ -57,7 +57,8 @@ def google_ads_to_bigquery():
         # Send Data to BigQuery
         dataset_id = credentials.google_ads_dataset_id
         table_id = credentials.google_ads_table_id
-        table_ref = bigquery_client.dataset(dataset_id).table(table_id)
+        table_ref = bigquery_client.ecocare-ads-data.ecocare_ads_data.table(table_id)
+        table_ref_ = bigquery_client.
         errors = bigquery_client.insert_rows_json(table_ref, rows_to_insert)
 
         # Error Handling for BigQuery Insertion
