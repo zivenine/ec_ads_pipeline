@@ -1,5 +1,8 @@
 This project extracts marketing data from Google Analytics 4, Facebook Ads and Google Ads, then sends it to BigQuery so that it can be pulled into Looker Studio and reported on. 
 
+![ECoCare - Data Pipeline](https://github.com/zivenine/ec_ads_pipeline/assets/138107601/1a106cc6-cc2a-4f32-bbcc-9c31a38fefdb)
+
+
 **main.py** - this script is scheduled to run on the 2nd of each month as a Cloud Function.
 
 1. Access Facebook app secret, token, and Google Cloud project's service account. 
